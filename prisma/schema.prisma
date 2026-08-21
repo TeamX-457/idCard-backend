@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+}
+
+model School {
+  id           String   @id @default(uuid())
+  name         String
+  address      String?
+  contactEmail String?  @map("contact_email")
+  contactPhone String?  @map("contact_phone")
+  status       String   @default("active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  users    User[]
+  students Student[]
+
+  @@map("schools")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  status       String   @default("active")
+  schoolId     String?  @map("school_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  school School? @relation(fields: [schoolId], references: [id])
+
+  @@map("users")
+}
+
+model Student {
+  id              String   @id @default(uuid())
+  schoolId        String   @map("school_id")
+  name            String
+  class           String
+  admissionNumber String   @map("admission_number")
+  status          String   @default("active")
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  school    School     @relation(fields: [schoolId], references: [id])
+  guardians Guardian[]
+
+  @@unique([schoolId, admissionNumber])
+  @@map("students")
+}
+
+model Guardian {
+  id                     String   @id @default(uuid())
+  studentId              String   @map("student_id")
+  name                   String
+  phoneNumber            String   @map("phone_number")
+  relationship           String
+  notificationPreference String   @default("sms") @map("notification_preference")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("guardians")
+}

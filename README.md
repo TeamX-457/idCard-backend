@@ -1,133 +1,80 @@
-# ID Card Management System — Backend
+# ID Card Management System - Backend
 
-The backend API for the **ID Card Management System**, a web application designed to manage and track identification cards and their associated records.
-
-This repository contains the server-side logic responsible for handling requests from the frontend, processing ID card data, and providing the API used by the application.
-
-## Features
-
-* Manage ID card records
-* Create new ID card records
-* Retrieve ID card information
-* Update existing records
-* Track ID card status
-* Search and retrieve records
-* Provide API endpoints for the frontend
-* Handle application data and server-side logic
+Backend service for the ID Card Management System. It is built with Express and TypeScript, uses Prisma to connect to PostgreSQL, and validates requests with Zod.
 
 ## Tech Stack
 
-The backend is built using modern server-side web technologies.
-
-> Add the exact technologies used by the project here, for example:
->
-> * Node.js
-> * Express.js
-> * MongoDB
-> * REST API
+- Node.js
+- TypeScript
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- Zod
+- JSON Web Tokens
 
 ## Getting Started
 
 ### Prerequisites
 
-Make sure you have the required development tools installed.
-
-For a typical Node.js backend, you will need:
-
-* Node.js
-* npm
-* A database if required by the application
+- Node.js
+- pnpm
+- PostgreSQL
 
 ### Installation
 
-Clone the repository:
-
 ```bash
 git clone https://github.com/TeamX-457/idCard-backend.git
-```
-
-Move into the project directory:
-
-```bash
 cd idCard-backend
-```
-
-Install the dependencies:
-
-```bash
-npm install
+pnpm install
 ```
 
 ### Environment Variables
 
-Create a `.env` file in the root directory and provide the configuration required by the backend.
-
-Example:
+Create a `.env` file in the project root. Keep database credentials and JWT secrets private and do not commit them.
 
 ```env
-PORT=5000
-DATABASE_URL=your_database_url
+PORT=5050
 ```
-
-Use the actual environment variable names and values required by the project.
-
-**Do not commit your `.env` file or other sensitive credentials to the repository.**
 
 ### Running the Server
 
-Start the development server using the project's configured npm script:
+Start the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-If the project does not have a development script, use the appropriate start command defined in `package.json`.
+The server runs on port `5050` by default.
 
-The API will be available at the configured server address.
+To build and start the production version:
 
-## API
-
-The backend provides the API used by the frontend application.
-
-Typical operations include:
-
-| Method          | Purpose                  |
-| --------------- | ------------------------ |
-| `GET`           | Retrieve ID card records |
-| `POST`          | Create an ID card record |
-| `PUT` / `PATCH` | Update an ID card record |
-| `DELETE`        | Remove an ID card record |
-
-The exact endpoints and request formats should be documented here as the API develops.
-
-Example:
-
-```text
-GET    /api/id-cards
-GET    /api/id-cards/:id
-POST   /api/id-cards
-PATCH  /api/id-cards/:id
-DELETE /api/id-cards/:id
+```bash
+pnpm build
+pnpm start
 ```
 
 ## Project Structure
 
-A typical backend structure may look like:
-
 ```text
 idCard-backend/
+├── prisma/
+│   ├── migrations/
+│   └── schema.prisma
 ├── src/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   ├── middleware/
-│   └── ...
-├── .env
+│   ├── controllers/       # Request handlers
+│   ├── generated/prisma/   # Generated Prisma client
+│   ├── lib/                # JWT and password helpers
+│   ├── middleware/         # Logging, validation, auth, and errors
+│   ├── routes/             # Express route definitions
+│   ├── utils/              # Validation schemas and utilities
+│   ├── db.ts               # Prisma database client
+│   ├── server.ts           # Express application entry point
+│   └── swagger.ts          # OpenAPI and Swagger configuration
 ├── package.json
+├── pnpm-lock.yaml
+├── .env
 └── README.md
 ```
-
-The actual structure may differ depending on the architecture used in the project.
 
 ## Frontend
 
