@@ -1,8 +1,15 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { validate } from "../middleware/validator.js";
-import { createStudentSchema } from "../utils/validator.js";
-import { createStudent, getStudents, getStudent } from "../controllers/studentController.js";
+import { createStudentSchema, editStudentSchema } from "../utils/validator.js";
+import {
+  createStudent,
+  getStudents,
+  getStudent,
+  editStudent,
+  unregisterStudent,
+} from "../controllers/studentController.js";
+import { getGuardiansForStudent } from "../controllers/guardianController.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
@@ -80,6 +87,39 @@ router.get("/", requireAuth, asyncHandler(getStudents));
 
 /**
  * @openapi
+ * /students/{studentId}/guardians:
+ *   get:
+ *     tags: [Students]
+ *     summary: List guardians for a student
+ *     description: Returns all guardians attached to a student in the authenticated user's school.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: studentId
+ *         in: path
+ *         required: true
+ *         description: Student UUID
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Guardian list for the student
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GuardianListResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.get("/:studentId/guardians", requireAuth, asyncHandler(getGuardiansForStudent));
+
+/**
+ * @openapi
  * /students/{id}:
  *   get:
  *     tags: [Students]
@@ -110,5 +150,83 @@ router.get("/", requireAuth, asyncHandler(getStudents));
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/:id", requireAuth, asyncHandler(getStudent));
+
+/**
+ * @openapi
+ * /students/{id}:
+ *   patch:
+ *     tags: [Students]
+ *     summary: Edit a student
+ *     description: Updates the provided fields for a student belonging to the authenticated user's school.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Student UUID
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/EditStudentRequest'
+ *     responses:
+ *       200:
+ *         description: Student updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StudentResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       409:
+ *         $ref: '#/components/responses/ConflictError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.patch("/:id", requireAuth, validate(editStudentSchema), asyncHandler(editStudent));
+
+/**
+ * @openapi
+ * /students/{id}/unregister:
+ *   patch:
+ *     tags: [Students]
+ *     summary: Unregister a student
+ *     description: Marks a student belonging to the authenticated user's school as unregistered.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Student UUID
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Student unregistered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StudentResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       409:
+ *         $ref: '#/components/responses/ConflictError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.patch("/:id/unregister", requireAuth, asyncHandler(unregisterStudent));
 
 export default router;

@@ -6,6 +6,7 @@ import authRouter from "./routes/authRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerDocument } from "./swagger.js";
 import studentRouter from "./routes/studentRoutes.js";
+import guardianRouter from "./routes/guardianRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(logger);
 
 app.use("/auth", authRouter);
 app.use("/students", studentRouter);
+app.use("/guardians", guardianRouter);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

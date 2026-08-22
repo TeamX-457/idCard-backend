@@ -18,6 +18,7 @@ const options: swaggerJsdoc.Options = {
       { name: "General", description: "Service information" },
       { name: "Authentication", description: "School and user authentication" },
       { name: "Students", description: "Student records for the authenticated school" },
+      { name: "Guardians", description: "Guardian records and links to students" },
     ],
     components: {
       responses: {
@@ -58,9 +59,9 @@ const options: swaggerJsdoc.Options = {
           type: "object",
           required: ["schoolName", "adminName", "email", "password"],
           properties: {
-            schoolName: { type: "string", minLength: 2, example: "Northbridge Academy" },
-            adminName: { type: "string", minLength: 2, example: "Ada Lovelace" },
-            email: { type: "string", format: "email", example: "admin@northbridge.edu" },
+            schoolName: { type: "string", minLength: 2, example: "Itam Community School" },
+            adminName: { type: "string", minLength: 2, example: "Akpan Eteng" },
+            email: { type: "string", format: "email", example: "admin@itamcommunity.edu" },
             password: { type: "string", minLength: 6, format: "password", example: "secure-password" },
           },
         },
@@ -68,7 +69,7 @@ const options: swaggerJsdoc.Options = {
           type: "object",
           required: ["email", "password"],
           properties: {
-            email: { type: "string", format: "email", example: "admin@northbridge.edu" },
+            email: { type: "string", format: "email", example: "admin@itamcommunity.edu" },
             password: { type: "string", minLength: 1, format: "password", example: "secure-password" },
           },
         },
@@ -100,8 +101,39 @@ const options: swaggerJsdoc.Options = {
           type: "object",
           required: ["name", "class", "admissionNumber"],
           properties: {
-            name: { type: "string", minLength: 2, example: "Jordan Lee" },
+            name: { type: "string", minLength: 2, example: "Grace Nkereuwem" },
             class: { type: "string", minLength: 1, example: "JSS 2" },
+            admissionNumber: { type: "string", minLength: 1, example: "NBA-2026-0042" },
+            metadata: {
+              type: "object",
+              additionalProperties: true,
+              example: { bloodGroup: "O+", house: "Blue" },
+            },
+          },
+        },
+        CreateGuardianRequest: {
+          type: "object",
+          required: ["name", "phoneNumber"],
+          properties: {
+            name: { type: "string", minLength: 2, example: "Uduak Thompson" },
+            phoneNumber: { type: "string", minLength: 7, example: "+2348012345678" },
+            notificationPreference: { type: "string", example: "sms" },
+          },
+        },
+        AttachStudentToGuardianRequest: {
+          type: "object",
+          required: ["studentId", "relationship"],
+          properties: {
+            studentId: { type: "string", format: "uuid", example: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6" },
+            relationship: { type: "string", example: "Father" },
+          },
+        },
+        EditStudentRequest: {
+          type: "object",
+          description: "At least one field may be provided.",
+          properties: {
+            name: { type: "string", minLength: 2, example: "Grace Nkereuwem" },
+            class: { type: "string", minLength: 1, example: "JSS 3" },
             admissionNumber: { type: "string", minLength: 1, example: "NBA-2026-0042" },
             metadata: {
               type: "object",
@@ -124,11 +156,69 @@ const options: swaggerJsdoc.Options = {
             updatedAt: { type: "string", format: "date-time" },
           },
         },
+        StudentWithRelationship: {
+          allOf: [
+            { $ref: "#/components/schemas/Student" },
+            {
+              type: "object",
+              properties: {
+                relationship: { type: "string", example: "Father" },
+              },
+            },
+          ],
+        },
+        Guardian: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            name: { type: "string" },
+            phoneNumber: { type: "string" },
+            notificationPreference: { type: "string", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        GuardianWithRelationship: {
+          allOf: [
+            { $ref: "#/components/schemas/Guardian" },
+            {
+              type: "object",
+              properties: {
+                relationship: { type: "string", example: "Mother" },
+              },
+            },
+          ],
+        },
+        StudentGuardianLink: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            studentId: { type: "string", format: "uuid" },
+            guardianId: { type: "string", format: "uuid" },
+            relationship: { type: "string" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
         StudentResponse: {
           type: "object",
           required: ["student"],
           properties: {
             student: { $ref: "#/components/schemas/Student" },
+          },
+        },
+        GuardianResponse: {
+          type: "object",
+          required: ["guardian"],
+          properties: {
+            guardian: { $ref: "#/components/schemas/Guardian" },
+          },
+        },
+        StudentGuardianLinkResponse: {
+          type: "object",
+          required: ["link"],
+          properties: {
+            link: { $ref: "#/components/schemas/StudentGuardianLink" },
           },
         },
         StudentListResponse: {
@@ -145,6 +235,20 @@ const options: swaggerJsdoc.Options = {
                 totalPages: { type: "integer", example: 2 },
               },
             },
+          },
+        },
+        GuardianListResponse: {
+          type: "object",
+          required: ["guardians"],
+          properties: {
+            guardians: { type: "array", items: { $ref: "#/components/schemas/GuardianWithRelationship" } },
+          },
+        },
+        StudentWithRelationshipListResponse: {
+          type: "object",
+          required: ["students"],
+          properties: {
+            students: { type: "array", items: { $ref: "#/components/schemas/StudentWithRelationship" } },
           },
         },
         ErrorResponse: {

@@ -76,3 +76,57 @@ export const getStudent = async (req: Request, res: Response) => {
 
   res.json({ student });
 };
+
+export const editStudent = async (req: Request, res: Response) => {
+  const schoolId = req.user!.schoolId;
+  const id = req.params.id as string;
+
+  const student = await prisma.student.findUnique({ where: { id } });
+  if (!student || student.schoolId !== schoolId) {
+    throw new AppError("Student not found", 404);
+  }
+
+  const { name, class: studentClass, admissionNumber, metadata } = req.body;
+
+  if (admissionNumber && admissionNumber !== student.admissionNumber) {
+    const clash = await prisma.student.findUnique({
+      where: { schoolId_admissionNumber: { schoolId, admissionNumber } },
+    });
+    if (clash) {
+      throw new AppError("A student with this admission number already exists", 409);
+    }
+  }
+
+  const updated = await prisma.student.update({
+    where: { id },
+    data: {
+      ...(name && { name }),
+      ...(studentClass && { class: studentClass }),
+      ...(admissionNumber && { admissionNumber }),
+      ...(metadata !== undefined && { metadata }),
+    },
+  });
+
+  res.json({ student: updated });
+};
+
+export const unregisterStudent = async (req: Request, res: Response) => {
+  const schoolId = req.user!.schoolId;
+  const id = req.params.id as string;
+
+  const student = await prisma.student.findUnique({ where: { id } });
+  if (!student || student.schoolId !== schoolId) {
+    throw new AppError("Student not found", 404);
+  }
+
+  if (student.status === "unregistered") {
+    throw new AppError("Student is already unregistered", 409);
+  }
+
+  const updated = await prisma.student.update({
+    where: { id },
+    data: { status: "unregistered" },
+  });
+
+  res.json({ student: updated });
+};

@@ -61,7 +61,7 @@ model Student {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   school    School     @relation(fields: [schoolId], references: [id])
-  guardians Guardian[]
+  guardians StudentGuardian[]
 
   @@unique([schoolId, admissionNumber])
   @@map("students")
@@ -69,15 +69,27 @@ model Student {
 
 model Guardian {
   id                     String   @id @default(uuid())
-  studentId              String   @map("student_id")
   name                   String
   phoneNumber            String   @map("phone_number")
-  relationship           String
   notificationPreference String   @default("sms") @map("notification_preference")
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
-  student Student @relation(fields: [studentId], references: [id])
+  students StudentGuardian[]
 
   @@map("guardians")
+}
+
+model StudentGuardian {
+  id           String   @id @default(uuid())
+  studentId    String   @map("student_id")
+  guardianId   String   @map("guardian_id")
+  relationship String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  student  Student  @relation(fields: [studentId], references: [id])
+  guardian Guardian @relation(fields: [guardianId], references: [id])
+
+  @@unique([studentId, guardianId])
+  @@map("student_guardians")
 }

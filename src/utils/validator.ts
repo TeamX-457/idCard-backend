@@ -18,3 +18,21 @@ export const createStudentSchema = z.object({
   admissionNumber: z.string().min(1, "Admission number is required"),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
+
+export const editStudentSchema = z.object({
+  name: z.string().min(2, "Student name must be at least 2 characters").optional(),
+  class: z.string().min(1, "Class is required").optional(),
+  admissionNumber: z.string().min(1, "Admission number is required").optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const createGuardianSchema = z.object({
+  name: z.string().min(2, "Guardian name must be at least 2 characters"),
+  phoneNumber: z.string().min(7, "A valid phone number is required"),
+  notificationPreference: z.string().optional(),
+});
+
+export const attachStudentToGuardianSchema = z.object({
+  studentId: z.string().uuid("A valid studentId is required"),
+  relationship: z.string().min(1, "Relationship is required"),
+});

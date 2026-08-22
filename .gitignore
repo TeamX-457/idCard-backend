@@ -2,3 +2,10 @@ node_modules
 dist
 .env
 /src/generated/prisma
+*.log
+.DS_Store
+prisma/migrations/dev.db
+coverage
+.vscode/*
+!.vscode/extensions.json
+manual-tests.md
