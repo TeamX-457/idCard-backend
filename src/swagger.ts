@@ -19,6 +19,8 @@ const options: swaggerJsdoc.Options = {
       { name: "Authentication", description: "School and user authentication" },
       { name: "Students", description: "Student records for the authenticated school" },
       { name: "Guardians", description: "Guardian records and links to students" },
+      { name: "Cards", description: "ID card assignment and revocation for the authenticated school" },
+      { name: "Devices", description: "Device registration and credential management for the authenticated school" },
     ],
     components: {
       responses: {
@@ -128,6 +130,23 @@ const options: swaggerJsdoc.Options = {
             relationship: { type: "string", example: "Father" },
           },
         },
+        AssignCardRequest: {
+          type: "object",
+          required: ["studentId", "uid"],
+          properties: {
+            studentId: { type: "string", minLength: 1, example: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6" },
+            uid: { type: "string", minLength: 1, example: "A1B2C3D4" },
+          },
+        },
+        RegisterDeviceRequest: {
+          type: "object",
+          required: ["locationName"],
+          properties: {
+            locationName: { type: "string", minLength: 1, example: "North Gate" },
+            latitude: { type: "number", example: 5.123456 },
+            longitude: { type: "number", example: 7.456789 },
+          },
+        },
         EditStudentRequest: {
           type: "object",
           description: "At least one field may be provided.",
@@ -200,11 +219,67 @@ const options: swaggerJsdoc.Options = {
             updatedAt: { type: "string", format: "date-time" },
           },
         },
+        Card: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            schoolId: { type: "string", format: "uuid" },
+            studentId: { type: "string", format: "uuid" },
+            uid: { type: "string" },
+            status: { type: "string", enum: ["active", "revoked"], example: "active" },
+            revokedAt: { type: "string", format: "date-time", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        Device: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            schoolId: { type: "string", format: "uuid" },
+            locationName: { type: "string" },
+            latitude: { type: "number", nullable: true },
+            longitude: { type: "number", nullable: true },
+            status: { type: "string", enum: ["active", "disabled"], example: "active" },
+            secretHash: { type: "string", description: "Hashed secret. Never exposed to clients." },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
         StudentResponse: {
           type: "object",
           required: ["student"],
           properties: {
             student: { $ref: "#/components/schemas/Student" },
+          },
+        },
+        CardResponse: {
+          type: "object",
+          required: ["card"],
+          properties: {
+            card: { $ref: "#/components/schemas/Card" },
+          },
+        },
+        DeviceResponse: {
+          type: "object",
+          required: ["device"],
+          properties: {
+            device: { $ref: "#/components/schemas/Device" },
+          },
+        },
+        DeviceWithSecretResponse: {
+          type: "object",
+          required: ["device", "secret"],
+          properties: {
+            device: { $ref: "#/components/schemas/Device" },
+            secret: { type: "string", description: "Raw device secret returned only once after registration or reset" },
+          },
+        },
+        DeviceListResponse: {
+          type: "object",
+          required: ["devices"],
+          properties: {
+            devices: { type: "array", items: { $ref: "#/components/schemas/Device" } },
           },
         },
         GuardianResponse: {

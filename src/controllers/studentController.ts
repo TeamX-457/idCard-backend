@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
 import { prisma } from "../db.js";
 import { AppError } from "../middleware/errorHandler.js";
+import { requireSchoolAdmin } from "../utils/requireSchoolAdmin.js";
 
 export const createStudent = async (req: Request, res: Response) => {
-  const schoolId = req.user!.schoolId;
-
-  if (!schoolId) {
-    throw new AppError("Only school admins can create students", 403);
-  }
+  const schoolId = requireSchoolAdmin(req);
 
   const { name, class: studentClass, admissionNumber, metadata } = req.body;
 
@@ -33,11 +30,7 @@ export const createStudent = async (req: Request, res: Response) => {
 };
 
 export const getStudents = async (req: Request, res: Response) => {
-  const schoolId = req.user!.schoolId;
-
-  if (!schoolId) {
-    throw new AppError("Only school admins can view students", 403);
-  }
+  const schoolId = requireSchoolAdmin(req);
 
   const page = Math.max(1, parseInt(req.query.page as string) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 25));
@@ -65,7 +58,7 @@ export const getStudents = async (req: Request, res: Response) => {
 };
 
 export const getStudent = async (req: Request, res: Response) => {
-  const schoolId = req.user!.schoolId;
+  const schoolId = requireSchoolAdmin(req);
   const id = req.params.id as string;
 
   const student = await prisma.student.findUnique({ where: { id } });
@@ -78,7 +71,7 @@ export const getStudent = async (req: Request, res: Response) => {
 };
 
 export const editStudent = async (req: Request, res: Response) => {
-  const schoolId = req.user!.schoolId;
+  const schoolId = requireSchoolAdmin(req);
   const id = req.params.id as string;
 
   const student = await prisma.student.findUnique({ where: { id } });
@@ -111,7 +104,7 @@ export const editStudent = async (req: Request, res: Response) => {
 };
 
 export const unregisterStudent = async (req: Request, res: Response) => {
-  const schoolId = req.user!.schoolId;
+  const schoolId = requireSchoolAdmin(req);
   const id = req.params.id as string;
 
   const student = await prisma.student.findUnique({ where: { id } });

@@ -36,3 +36,14 @@ export const attachStudentToGuardianSchema = z.object({
   studentId: z.string().uuid("A valid studentId is required"),
   relationship: z.string().min(1, "Relationship is required"),
 });
+
+export const assignCardSchema = z.object({
+  studentId: z.string().min(1, "A valid studentId is required"),
+  uid: z.string().min(1, "Card UID is required"),
+});
+
+export const registerDeviceSchema = z.object({
+  locationName: z.string().min(1, "Location name is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+});
