@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+
 export const registerSchoolSchema = z.object({
   schoolName: z.string().min(2, "School name must be at least 2 characters"),
   adminName: z.string().min(2, "Admin name must be at least 2 characters"),
@@ -46,4 +47,52 @@ export const registerDeviceSchema = z.object({
   locationName: z.string().min(1, "Location name is required"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
+});
+
+export const createAttendanceEventSchema = z.object({
+  uid: z.string().min(1, "uid is required"),
+  eventType: z.enum(["check_in", "check_out"]),
+});
+
+export const updateAttendanceRuleSchema = z
+  .object({
+    earlyThreshold: z.number().int().min(0).max(1439).optional(),
+    presentThreshold: z.number().int().min(0).max(1439).optional(),
+    absentThreshold: z.number().int().min(0).max(1439).optional(),
+    schoolDays: z.array(z.number().int().min(0).max(6)).min(1, "At least one school day is required").optional(),
+  })
+  .refine(
+    (data) => {
+      const { earlyThreshold, presentThreshold, absentThreshold } = data;
+      if (earlyThreshold !== undefined && presentThreshold !== undefined) {
+        if (earlyThreshold >= presentThreshold) return false;
+      }
+      if (presentThreshold !== undefined && absentThreshold !== undefined) {
+        if (presentThreshold >= absentThreshold) return false;
+      }
+      return true;
+    },
+    { message: "Thresholds must be ordered: early < present < absent" }
+  );
+
+
+  export const createTermSchema = z.object({
+  name: z.string().min(1, "Term name is required"),
+  startDate: z.string().date("A valid startDate (YYYY-MM-DD) is required"),
+  endDate: z.string().date("A valid endDate (YYYY-MM-DD) is required"),
+});
+
+export const createCalendarExceptionSchema = z.object({
+  date: z.string().date("A valid date (YYYY-MM-DD) is required"),
+  type: z.enum(["holiday", "makeup"]),
+  label: z.string().min(1, "Label is required"),
+});
+
+export const listAttendanceEventsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+  studentId: z.string().min(1).optional(),
+  eventType: z.enum(["check_in", "check_out"]).optional(),
+  startDate: z.string().date().optional(),
+  endDate: z.string().date().optional(),
 });
