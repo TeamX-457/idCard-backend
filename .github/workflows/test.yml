@@ -1,22 +1,32 @@
 name: Test
-on: 
+on:
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-  workflow_dispatch: 
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: getting the code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: installing pnpm
         uses: pnpm/setup@v2
-      - name: checking node
-        run: node --version
+        with:
+          runtime: node@22
       - name: Installing dependencies
         run: pnpm install --frozen-lockfile
       - name: running tests
