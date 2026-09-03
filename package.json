@@ -4,9 +4,10 @@
   "description": "",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "migrate:neon": "dotenv -e .env.neon -- prisma migrate deploy"
+    "build": "tsc -p tsconfig.json",
+    "typecheck:fast": "node node_modules/@typescript/native/bin/tsc --noEmit",
+    "migrate:neon": "dotenv -e .env.neon -- prisma migrate deploy",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "main": "dist/server.js",
   "keywords": [],
@@ -43,12 +44,13 @@
     "@types/pg": "^8.23.1",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "dotenv": "^17.4.2",
     "dotenv-cli": "^11.0.0",
     "jest": "^30.5.1",
     "prisma": "^7.9.1",
     "ts-jest": "^29.4.12",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
 }
