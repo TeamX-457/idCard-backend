@@ -1,0 +1,21 @@
+name: Test
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: 
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: getting the code
+        uses: actions/checkout@v4
+      - name: installing pnpm
+        uses: pnpm/setup@v2
+      - name: checking node
+        run: node --version
+      - name: running tests
+        run: pnpm test
