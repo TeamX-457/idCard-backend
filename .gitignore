@@ -1,6 +1,7 @@
 node_modules
 dist
 .env
+.env.neon
 /src/generated/prisma
 *.log
 .DS_Store

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "migrate:neon": "dotenv -e .env.neon -- prisma migrate deploy"
   },
   "main": "dist/server.js",
   "keywords": [],
@@ -36,13 +37,17 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.23.1",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
+    "jest": "^30.5.1",
     "prisma": "^7.9.1",
+    "ts-jest": "^29.4.12",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   }

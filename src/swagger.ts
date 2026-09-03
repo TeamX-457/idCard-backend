@@ -367,6 +367,14 @@ const options: swaggerJsdoc.Options = {
             event: { $ref: "#/components/schemas/AttendanceEvent" },
           },
         },
+        AttendanceEventDuplicateResponse: {
+          type: "object",
+          required: ["event", "duplicate"],
+          properties: {
+            event: { $ref: "#/components/schemas/AttendanceEvent" },
+            duplicate: { type: "boolean", example: true },
+          },
+        },
         AttendanceEventListResponse: {
           type: "object",
           required: ["events", "pagination"],

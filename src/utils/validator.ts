@@ -52,6 +52,7 @@ export const registerDeviceSchema = z.object({
 export const createAttendanceEventSchema = z.object({
   uid: z.string().min(1, "uid is required"),
   eventType: z.enum(["check_in", "check_out"]),
+  timestamp: z.string().datetime({ message: "timestamp must be a valid ISO 8601 datetime" }),
 });
 
 export const updateAttendanceRuleSchema = z

@@ -5,10 +5,20 @@ import { classifyStatus, minutesSinceMidnight, startOfDay } from "../utils/class
 import { requireSchoolAdmin } from "../utils/requireSchoolAdmin.js";
 import { listAttendanceEventsQuerySchema } from "../utils/validator.js";
 import { Prisma } from "../generated/prisma/client.js";
+import crypto from "crypto";
 
 export const createAttendanceEvent = async (req: Request, res: Response) => {
   const { id: deviceId, schoolId, locationName } = req.device!;
-  const { uid, eventType } = req.body;
+  const { uid, eventType, timestamp } = req.body;
+
+  if (!timestamp) {
+    throw new AppError("timestamp is required", 400);
+  }
+
+  const idempotencyKey = crypto
+    .createHash("sha256")
+    .update(`${deviceId}:${uid}:${timestamp}`)
+    .digest("hex");
 
   const card = await prisma.card.findFirst({
     where: { uid, schoolId, status: "active" },
@@ -18,24 +28,32 @@ export const createAttendanceEvent = async (req: Request, res: Response) => {
     throw new AppError("Card not recognized", 404);
   }
 
-  const event = await prisma.attendanceEvent.create({
-    data: {
-      studentId: card.studentId,
-      cardId: card.id,
-      deviceId,
-      eventType,
-      readerLocation: locationName,
-    },
-  });
+  let event;
+  try {
+    event = await prisma.attendanceEvent.create({
+      data: {
+        studentId: card.studentId,
+        cardId: card.id,
+        deviceId,
+        eventType,
+        timestamp: new Date(timestamp),
+        readerLocation: locationName,
+        idempotencyKey,
+      },
+    });
+  } catch (err: any) {
+    if (err.code === "P2002") {
+      const existing = await prisma.attendanceEvent.findUnique({
+        where: { idempotencyKey },
+      });
+      return res.status(200).json({ event: existing, duplicate: true });
+    }
+    throw err;
+  }
 
   if (eventType === "check_in") {
-    const today = startOfDay(event.timestamp);
+      const today = startOfDay(event.timestamp);
 
-    const existing = await prisma.dailyAttendanceStatus.findUnique({
-      where: { studentId_date: { studentId: card.studentId, date: today } },
-    });
-
-    if (!existing) {
       const rule = await prisma.attendanceRule.upsert({
         where: { schoolId },
         update: {},
@@ -44,11 +62,12 @@ export const createAttendanceEvent = async (req: Request, res: Response) => {
 
       const status = classifyStatus(minutesSinceMidnight(event.timestamp), rule);
 
-      await prisma.dailyAttendanceStatus.create({
-        data: { studentId: card.studentId, schoolId, date: today, status },
+      await prisma.dailyAttendanceStatus.upsert({
+        where: { studentId_date: { studentId: card.studentId, date: today } },
+        update: {}, // first check-in of the day wins; do nothing on repeat
+        create: { studentId: card.studentId, schoolId, date: today, status },
       });
     }
-  }
 
   res.status(201).json({ event });
 };

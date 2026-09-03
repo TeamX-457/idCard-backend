@@ -17,6 +17,20 @@ const router = Router();
  *     summary: Record a student attendance event
  *     description: Accepts a device-authenticated check-in or check-out event, verifies the card belongs to the school's active cards, and updates the daily attendance status when appropriate.
  *     security: []
+ *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         required: true
+ *         description: ID of the registered attendance device
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - name: x-device-secret
+ *         in: header
+ *         required: true
+ *         description: Secret for the registered attendance device
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -30,8 +44,16 @@ const router = Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AttendanceEventResponse'
+ *       200:
+ *         description: Duplicate attendance event; the original event is returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AttendanceEventDuplicateResponse'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *       500:

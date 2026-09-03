@@ -145,9 +145,10 @@ model AttendanceEvent {
   card           Card     @relation(fields: [cardId], references: [id])
   deviceId       String
   device         Device   @relation(fields: [deviceId], references: [id])
-  eventType      String   // "check_in" | "check_out"
+  eventType      String
   timestamp      DateTime @default(now())
   readerLocation String
+  idempotencyKey String   @unique @map("idempotency_key")
 
   @@map("attendance_events")
 }
