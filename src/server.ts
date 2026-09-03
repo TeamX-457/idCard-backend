@@ -14,11 +14,14 @@ import attendanceRuleRouter from "./routes/attendanceRuleRoutes.js";
 import dashboardRouter from "./routes/dashboardRoutes.js";
 import calendarRouter from "./routes/calendarRoutes.js";
 import termRouter from "./routes/termRoutes.js";
+import cors from 'cors';
+
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+app.use(cors());
 
 app.use(express.json());
 
