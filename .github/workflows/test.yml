@@ -17,5 +17,7 @@ jobs:
         uses: pnpm/setup@v2
       - name: checking node
         run: node --version
+      - name: Installing dependencies
+        run: pnpm install --frozen-lockfile
       - name: running tests
         run: pnpm test
